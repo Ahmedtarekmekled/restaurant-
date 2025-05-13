@@ -6,6 +6,20 @@ const nextConfig = {
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
+  images: {
+    domains: [
+      "images.unsplash.com",
+      "plus.unsplash.com",
+      "encrypted-tbn0.gstatic.com",
+      "buyfromlebanon.com",
+    ],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
+  },
 };
 
 module.exports = nextConfig;
