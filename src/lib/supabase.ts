@@ -55,6 +55,7 @@ export const addMenuItem = async (item: {
   price: number;
   category: string;
   image_url: string;
+  description: string;
 }) => {
   // Validate and normalize the image URL
   let imageUrl = item.image_url;
@@ -88,6 +89,7 @@ export const updateMenuItem = async (
     price?: number;
     category?: string;
     image_url?: string;
+    description?: string;
   }
 ) => {
   // Validate and normalize the image URL if it's being updated

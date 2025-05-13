@@ -4,13 +4,12 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
-import BasicButton from "./BasicButton";
 import Logo from "./Logo";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { t, language, setLanguage, isRTL } = useLanguage();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn: _ } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
 
   // Track scroll position to change navbar style on scroll
@@ -55,14 +54,14 @@ export default function Navbar() {
         }}
       >
         {/* Logo */}
-        <a
+        <Link
           href="/"
           style={{
             textDecoration: "none",
           }}
         >
           <Logo size="medium" />
-        </a>
+        </Link>
 
         {/* Mobile Controls */}
         <div
@@ -130,7 +129,7 @@ export default function Navbar() {
         >
           <div style={{ marginRight: "8px" }}>
             {/* Navigation links */}
-            <a
+            <Link
               href="/"
               style={{
                 color: "white",
@@ -141,6 +140,7 @@ export default function Navbar() {
                 transition: "background-color 0.2s",
                 backgroundColor: "transparent",
                 margin: "0 4px",
+                display: "inline-block",
               }}
               onMouseOver={(e) =>
                 (e.currentTarget.style.backgroundColor =
@@ -151,9 +151,9 @@ export default function Navbar() {
               }
             >
               {t("menu")}
-            </a>
+            </Link>
 
-            <a
+            <Link
               href="/about"
               style={{
                 color: "white",
@@ -164,6 +164,7 @@ export default function Navbar() {
                 transition: "background-color 0.2s",
                 backgroundColor: "transparent",
                 margin: "0 4px",
+                display: "inline-block",
               }}
               onMouseOver={(e) =>
                 (e.currentTarget.style.backgroundColor =
@@ -174,7 +175,7 @@ export default function Navbar() {
               }
             >
               {t("aboutUs")}
-            </a>
+            </Link>
           </div>
 
           {/* Language switcher on desktop */}
@@ -257,7 +258,7 @@ export default function Navbar() {
                 gap: "12px",
               }}
             >
-              <a
+              <Link
                 href="/"
                 style={{
                   display: "block",
@@ -283,8 +284,8 @@ export default function Navbar() {
                 }}
               >
                 {t("menu")}
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/about"
                 style={{
                   display: "block",
@@ -310,24 +311,11 @@ export default function Navbar() {
                 }}
               >
                 {t("aboutUs")}
-              </a>
+              </Link>
             </div>
           </div>
         </div>
       )}
     </div>
-  );
-}
-
-function NavLink({ href, label }: { href: string; label: string }) {
-  const { isRTL } = useLanguage();
-
-  return (
-    <Link
-      href={href}
-      className="bg-amber-700 hover:bg-amber-600 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors"
-    >
-      <span>{label}</span>
-    </Link>
   );
 }

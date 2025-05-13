@@ -24,8 +24,10 @@ interface ContactInfo {
   address: string;
   hoursTitle: string;
   hours: string;
-  phoneTitle: string;
+  contactTitle: string;
   phone: string;
+  email: string;
+  buttonText: string;
 }
 
 interface AboutSection {

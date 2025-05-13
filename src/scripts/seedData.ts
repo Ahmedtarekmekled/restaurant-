@@ -1,8 +1,9 @@
 // Script to seed the database with sample food items
-require("dotenv").config({ path: ".env.local" });
-const { createClient } = require("@supabase/supabase-js");
-const fs = require("fs");
-const path = require("path");
+import { config } from "dotenv";
+import { createClient } from "@supabase/supabase-js";
+
+// Initialize environment variables
+config({ path: ".env.local" });
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -17,7 +18,15 @@ if (!supabaseUrl || !supabaseServiceKey) {
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-const foodItems = [
+interface FoodItem {
+  name: string;
+  price: number;
+  category: string;
+  image_url: string;
+  description?: string;
+}
+
+const foodItems: FoodItem[] = [
   // Appetizers
   {
     name: "Hummus with Pita",
@@ -182,7 +191,7 @@ async function seedDatabase() {
 
     // Insert new items
     for (const item of foodItems) {
-      const { data, error } = await supabase.from("menu_items").insert([item]);
+      const { error } = await supabase.from("menu_items").insert([item]);
 
       if (error) {
         console.error(`Error adding item "${item.name}":`, error);

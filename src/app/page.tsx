@@ -7,7 +7,6 @@ import { useLanguage } from "@/context/LanguageContext";
 import MenuItemCard from "@/components/MenuItemCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { ChevronDown, ChevronUp, Search, X } from "lucide-react";
 import BasicButton from "@/components/BasicButton";
 
 export default function Home() {
@@ -42,6 +41,20 @@ export default function Home() {
       }
     }
   }, [categories]);
+
+  // Initialize expanded categories based on URL parameters
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const categoryParam = params.get("category");
+      if (categoryParam) {
+        setExpandedCategories((prev) => ({
+          ...prev,
+          [categoryParam]: true,
+        }));
+      }
+    }
+  }, [expandedCategories]);
 
   const toggleCategory = (category: string) => {
     setExpandedCategories((prev) => ({
@@ -100,44 +113,30 @@ export default function Home() {
     )
   );
 
-  // Define inline styles to avoid CSS issues
+  // Styles
   const styles = {
-    searchButton: {
-      backgroundColor: "#d97706",
-      color: "white",
-      display: "inline-flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: "8px",
-      padding: "8px 16px",
-      borderRadius: "20px",
-      border: "none",
-      fontSize: "14px",
-      fontWeight: "500" as const,
-      cursor: "pointer",
-      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-    },
     searchInput: {
       width: "100%",
-      padding: "12px 40px",
-      borderRadius: "24px",
-      border: "2px solid #fcd34d",
-      fontSize: "14px",
+      padding: "12px 40px 12px 40px",
+      border: "2px solid #d97706",
+      borderRadius: "8px",
+      fontSize: "16px",
+      color: "#713f12",
       outline: "none",
     },
     searchIcon: {
       position: "absolute" as const,
+      left: "12px",
       top: "50%",
       transform: "translateY(-50%)",
-      [isRTL ? "right" : "left"]: "12px",
-      color: "#d97706",
       fontSize: "18px",
+      color: "#d97706",
     },
     clearButton: {
       position: "absolute" as const,
+      right: "12px",
       top: "50%",
       transform: "translateY(-50%)",
-      [isRTL ? "left" : "right"]: "12px",
       backgroundColor: "transparent",
       border: "none",
       color: "#d97706",
@@ -161,10 +160,8 @@ export default function Home() {
       border: "none",
       cursor: "pointer",
       fontSize: "18px",
-      fontWeight: "600" as const,
-      flexDirection: isRTL
-        ? ("row-reverse" as "row-reverse")
-        : ("row" as "row"),
+      fontWeight: "600",
+      flexDirection: isRTL ? ("row-reverse" as const) : ("row" as const),
     },
     chevronIcon: {
       fontSize: "24px",

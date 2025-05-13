@@ -16,6 +16,7 @@ interface MenuContextType {
     price: number;
     category: string;
     image_url: string;
+    description: string;
   }) => Promise<MenuItem | null>;
   refreshMenuItems: () => Promise<void>;
 }
@@ -53,6 +54,7 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
     price: number;
     category: string;
     image_url: string;
+    description: string;
   }) => {
     try {
       // Ensure the image URL starts with http or https
