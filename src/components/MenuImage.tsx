@@ -29,6 +29,13 @@ export default function MenuImage({
   const [isError, setIsError] = useState(false);
   const { t } = useLanguage();
 
+  // Check if the image is from an external domain
+  const isExternalImage =
+    src.startsWith("http") && !src.includes("restaurant-neon-psi.vercel.app");
+
+  // Use a fallback image URL if there's an error
+  const fallbackImageUrl = "https://placehold.co/600x400?text=Image+Not+Found";
+
   const handleError = () => {
     setIsError(true);
   };
@@ -63,6 +70,56 @@ export default function MenuImage({
     );
   }
 
+  // Use regular img tag for external images to avoid Next.js image optimization issues
+  if (isExternalImage) {
+    if (fill) {
+      return (
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            height: "100%",
+            overflow: "hidden",
+          }}
+          className={className}
+        >
+          <img
+            src={src}
+            alt={alt || "Menu item"}
+            onError={(e) => {
+              e.currentTarget.src = fallbackImageUrl;
+              e.currentTarget.onerror = null; // Prevent infinite loop
+            }}
+            style={{
+              objectFit: "cover",
+              width: "100%",
+              height: "100%",
+              position: "absolute",
+              top: 0,
+              left: 0,
+            }}
+          />
+        </div>
+      );
+    }
+
+    return (
+      <img
+        src={src}
+        alt={alt || "Menu item"}
+        width={width || 300}
+        height={height || 200}
+        className={className}
+        onError={(e) => {
+          e.currentTarget.src = fallbackImageUrl;
+          e.currentTarget.onerror = null; // Prevent infinite loop
+        }}
+        style={{ objectFit: "cover" }}
+      />
+    );
+  }
+
+  // Use Next.js Image component for internal images
   return fill ? (
     <Image
       src={src}
@@ -75,6 +132,7 @@ export default function MenuImage({
       className={className}
       onError={handleError}
       style={{ objectFit: "cover" }}
+      unoptimized={isExternalImage}
     />
   ) : (
     <Image
@@ -86,6 +144,7 @@ export default function MenuImage({
       className={className}
       onError={handleError}
       style={{ objectFit: "cover" }}
+      unoptimized={isExternalImage}
     />
   );
 }

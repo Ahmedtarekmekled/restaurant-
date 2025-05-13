@@ -12,6 +12,7 @@ const nextConfig = {
       "plus.unsplash.com",
       "encrypted-tbn0.gstatic.com",
       "buyfromlebanon.com",
+      "placehold.co",
     ],
     remotePatterns: [
       {
@@ -19,6 +20,7 @@ const nextConfig = {
         hostname: "**",
       },
     ],
+    unoptimized: true, // This will bypass the image optimization API completely
   },
 };
 
