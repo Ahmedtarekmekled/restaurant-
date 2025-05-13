@@ -9,15 +9,49 @@ import Footer from "@/components/Footer";
 import { MapPin, Clock, Phone, ChevronDown, ChevronUp } from "lucide-react";
 import aboutUsContent from "@/content/about-us.json";
 
+// Define types for our content structure
+interface AboutImages {
+  hero: string;
+  story: string;
+  philosophy: string;
+  team: string;
+  commitment: string;
+}
+
+interface ContactInfo {
+  title: string;
+  addressTitle: string;
+  address: string;
+  hoursTitle: string;
+  hours: string;
+  phoneTitle: string;
+  phone: string;
+}
+
+interface AboutSection {
+  heading: string;
+  content: string;
+}
+
+interface AboutContent {
+  title: string;
+  callToAction: string;
+  images: AboutImages;
+  contactInfo: ContactInfo;
+  sections: AboutSection[];
+}
+
 export default function AboutPage() {
   const { isRTL } = useLanguage();
-  const [content, setContent] = useState<any>(null);
+  const [content, setContent] = useState<AboutContent | null>(null);
   const [expandedSection, setExpandedSection] = useState<number | null>(null);
 
   useEffect(() => {
     // Get the content based on the current language
     const languageKey = isRTL ? "ar" : "en";
-    setContent(aboutUsContent[languageKey]);
+    setContent(
+      aboutUsContent[languageKey as keyof typeof aboutUsContent] as AboutContent
+    );
   }, [isRTL]);
 
   const toggleSection = (index: number) => {
@@ -111,7 +145,7 @@ export default function AboutPage() {
             className="bg-white rounded-xl shadow-lg overflow-hidden mb-10"
           >
             <div className="p-6 md:p-8">
-              {content.sections.map((section: any, index: number) => (
+              {content.sections.map((section: AboutSection, index: number) => (
                 <motion.div
                   key={index}
                   variants={itemVariants}
@@ -158,7 +192,7 @@ export default function AboutPage() {
             variants={containerVariants}
             className="space-y-4"
           >
-            {content.sections.map((section: any, index: number) => (
+            {content.sections.map((section: AboutSection, index: number) => (
               <motion.div
                 key={index}
                 variants={itemVariants}

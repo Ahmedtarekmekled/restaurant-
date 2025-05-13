@@ -1,19 +1,19 @@
 "use client";
 
-import { useState, useEffect, Fragment } from "react";
+import { useState, useEffect, Fragment, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMenu } from "@/context/MenuContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
 import {
-  getMenuItems,
   updateMenuItem,
   deleteMenuItem,
   getMenuItemsByCategory,
 } from "@/lib/supabase";
 import { MenuItem } from "@/types/MenuItem";
 import MenuImage from "@/components/MenuImage";
+import Image from "next/image";
 import {
   ChevronDown,
   ChevronUp,
@@ -22,7 +22,6 @@ import {
   Trash2,
   Tag,
   DollarSign,
-  ImageIcon,
   Save,
   X,
   AlertCircle,
@@ -32,9 +31,8 @@ import {
   Globe,
   LogOut,
   FileText,
-  Image,
+  Image as ImageIcon,
   Paperclip,
-  Search,
 } from "lucide-react";
 import { formatEGP } from "@/utils/currency";
 
@@ -102,7 +100,7 @@ export default function Dashboard() {
   };
 
   // Fetch menu items grouped by category
-  const fetchMenuItems = async () => {
+  const fetchMenuItems = useCallback(async () => {
     setIsLoading(true);
     try {
       const groupedItems = await getMenuItemsByCategory();
@@ -128,11 +126,11 @@ export default function Dashboard() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [expandedCategories, t]);
 
   useEffect(() => {
     fetchMenuItems();
-  }, []);
+  }, [fetchMenuItems]);
 
   const toggleLanguage = () => {
     setLanguage(language === "en" ? "ar" : "en");
@@ -322,6 +320,26 @@ export default function Dashboard() {
   };
 
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Filter menu items based on search query
+  const filteredMenuItemsByCategory = Object.keys(menuItemsByCategory).reduce(
+    (acc, category) => {
+      if (searchQuery.trim() === "") {
+        acc[category] = menuItemsByCategory[category];
+      } else {
+        const filteredItems = menuItemsByCategory[category].filter(
+          (item) =>
+            item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.description.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        if (filteredItems.length > 0) {
+          acc[category] = filteredItems;
+        }
+      }
+      return acc;
+    },
+    {} as Record<string, MenuItem[]>
+  );
 
   return (
     <div className="min-h-screen bg-amber-50">
@@ -580,7 +598,7 @@ export default function Dashboard() {
                       htmlFor="image_url"
                       className="block mb-1 font-medium text-sm text-gray-700 flex items-center"
                     >
-                      <Image
+                      <ImageIcon
                         size={16}
                         style={{ marginRight: "0.5rem", color: "#d97706" }}
                       />
@@ -650,15 +668,18 @@ export default function Dashboard() {
                           overflow: "hidden",
                         }}
                       >
-                        <img
+                        <Image
                           src={formData.image_url}
-                          alt="Item preview"
+                          alt={t("itemPreview")}
+                          width={300}
+                          height={160}
                           style={{
                             width: "100%",
                             height: "100%",
                             objectFit: "cover",
                           }}
                           onError={(e) => {
+                            // Handle image error by setting a placeholder
                             e.currentTarget.src =
                               "https://placehold.co/600x400?text=Image+Error";
                           }}
@@ -793,13 +814,11 @@ export default function Dashboard() {
                       className="animate-spin text-amber-500"
                     />
                   </div>
-                ) : Object.keys(menuItemsByCategory).length === 0 ? (
+                ) : Object.keys(filteredMenuItemsByCategory).length === 0 &&
+                  searchQuery.trim() !== "" ? (
                   <div className="text-center py-10">
-                    <div className="mx-auto h-20 w-20 text-amber-400 mb-4 flex items-center justify-center rounded-full bg-amber-50">
-                      <Coffee size={36} />
-                    </div>
-                    <p className="mt-2 text-amber-600 font-serif">
-                      {t("noMenuItems")}
+                    <p className="text-amber-700 font-serif text-lg">
+                      {t("noResults")}
                     </p>
                   </div>
                 ) : (
@@ -809,8 +828,37 @@ export default function Dashboard() {
                     animate="show"
                     variants={containerVariants}
                   >
-                    {Object.entries(menuItemsByCategory).map(
-                      ([category, items]) => (
+                    {/* Search box */}
+                    <div className="mb-4">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder={t("searchItems")}
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="w-full p-2 pl-8 border border-amber-200 rounded-md"
+                        />
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-2 text-amber-500">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    {Object.keys(filteredMenuItemsByCategory).map(
+                      (category) => (
                         <motion.div
                           key={category}
                           className="border border-amber-100 rounded-lg overflow-hidden shadow-md"
@@ -862,7 +910,7 @@ export default function Dashboard() {
                                   borderRadius: "9999px",
                                 }}
                               >
-                                {items.length}
+                                {filteredMenuItemsByCategory[category].length}
                               </span>
                             </div>
                             <div style={{ color: "#d97706" }}>
@@ -900,103 +948,114 @@ export default function Dashboard() {
                                 }}
                               >
                                 <div className="divide-y divide-amber-100">
-                                  {items.map((item) => (
-                                    <motion.div
-                                      key={item.id}
-                                      className="p-4 flex flex-col sm:flex-row items-center sm:items-start gap-4 hover:bg-amber-50 transition-colors"
-                                      initial={{ opacity: 0 }}
-                                      animate={{ opacity: 1 }}
-                                      transition={{ duration: 0.2 }}
-                                    >
-                                      <div className="w-24 h-24 relative rounded-md overflow-hidden flex-shrink-0 border border-amber-100">
-                                        <MenuImage
-                                          src={item.image_url}
-                                          alt={item.name}
-                                          fill
-                                          sizes="96px"
-                                        />
-                                      </div>
-
-                                      <div className="flex-1 min-w-0 text-center sm:text-left">
-                                        <h4 className="text-base font-medium text-amber-900 truncate">
-                                          {item.name}
-                                        </h4>
-                                        <p className="text-sm text-amber-600 font-bold mt-1">
-                                          {formatEGP(item.price)}
-                                        </p>
-                                        <p className="text-xs text-amber-500 mt-1">
-                                          {getCategoryName(category)}
-                                        </p>
-                                      </div>
-
-                                      <div className="flex sm:flex-col gap-2 mt-2 sm:mt-0">
-                                        <button
-                                          onClick={() => handleEdit(item)}
-                                          style={{
-                                            display: "inline-flex",
-                                            alignItems: "center",
-                                            padding: "0.375rem 0.75rem",
-                                            backgroundColor: "#f59e0b",
-                                            color: "white",
-                                            borderRadius: "0.375rem",
-                                            fontSize: "0.75rem",
-                                            fontWeight: "500",
-                                            border: "none",
-                                            boxShadow:
-                                              "0 1px 2px rgba(0, 0, 0, 0.05)",
-                                            cursor: "pointer",
-                                          }}
-                                          onMouseOver={(e) =>
-                                            (e.currentTarget.style.backgroundColor =
-                                              "#d97706")
-                                          }
-                                          onMouseOut={(e) =>
-                                            (e.currentTarget.style.backgroundColor =
-                                              "#f59e0b")
-                                          }
-                                        >
-                                          <Pencil
-                                            size={14}
-                                            style={{ marginRight: "0.375rem" }}
+                                  {filteredMenuItemsByCategory[category].map(
+                                    (item) => (
+                                      <motion.div
+                                        key={item.id}
+                                        className="p-4 flex flex-col sm:flex-row items-center sm:items-start gap-4 hover:bg-amber-50 transition-colors"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        transition={{ duration: 0.2 }}
+                                      >
+                                        <div className="w-24 h-24 relative rounded-md overflow-hidden flex-shrink-0 border border-amber-100">
+                                          <MenuImage
+                                            src={
+                                              item.image_url ||
+                                              "/images/placeholder-food.jpg"
+                                            }
+                                            alt={
+                                              item.name || t("menuItemImage")
+                                            }
+                                            fill
+                                            sizes="96px"
                                           />
-                                          {t("edit")}
-                                        </button>
-                                        <button
-                                          onClick={() =>
-                                            handleDeleteClick(item.id)
-                                          }
-                                          style={{
-                                            display: "inline-flex",
-                                            alignItems: "center",
-                                            padding: "0.375rem 0.75rem",
-                                            backgroundColor: "#f43f5e",
-                                            color: "white",
-                                            borderRadius: "0.375rem",
-                                            fontSize: "0.75rem",
-                                            fontWeight: "500",
-                                            border: "none",
-                                            boxShadow:
-                                              "0 1px 2px rgba(0, 0, 0, 0.05)",
-                                            cursor: "pointer",
-                                          }}
-                                          onMouseOver={(e) =>
-                                            (e.currentTarget.style.backgroundColor =
-                                              "#e11d48")
-                                          }
-                                          onMouseOut={(e) =>
-                                            (e.currentTarget.style.backgroundColor =
-                                              "#f43f5e")
-                                          }
-                                        >
-                                          <Trash2
-                                            size={14}
-                                            style={{ marginRight: "0.375rem" }}
-                                          />
-                                          {t("delete")}
-                                        </button>
-                                      </div>
-                                    </motion.div>
-                                  ))}
+                                        </div>
+
+                                        <div className="flex-1 min-w-0 text-center sm:text-left">
+                                          <h4 className="text-base font-medium text-amber-900 truncate">
+                                            {item.name}
+                                          </h4>
+                                          <p className="text-sm text-amber-600 font-bold mt-1">
+                                            {formatEGP(item.price)}
+                                          </p>
+                                          <p className="text-xs text-amber-500 mt-1">
+                                            {getCategoryName(category)}
+                                          </p>
+                                        </div>
+
+                                        <div className="flex sm:flex-col gap-2 mt-2 sm:mt-0">
+                                          <button
+                                            onClick={() => handleEdit(item)}
+                                            style={{
+                                              display: "inline-flex",
+                                              alignItems: "center",
+                                              padding: "0.375rem 0.75rem",
+                                              backgroundColor: "#f59e0b",
+                                              color: "white",
+                                              borderRadius: "0.375rem",
+                                              fontSize: "0.75rem",
+                                              fontWeight: "500",
+                                              border: "none",
+                                              boxShadow:
+                                                "0 1px 2px rgba(0, 0, 0, 0.05)",
+                                              cursor: "pointer",
+                                            }}
+                                            onMouseOver={(e) =>
+                                              (e.currentTarget.style.backgroundColor =
+                                                "#d97706")
+                                            }
+                                            onMouseOut={(e) =>
+                                              (e.currentTarget.style.backgroundColor =
+                                                "#f59e0b")
+                                            }
+                                          >
+                                            <Pencil
+                                              size={14}
+                                              style={{
+                                                marginRight: "0.375rem",
+                                              }}
+                                            />
+                                            {t("edit")}
+                                          </button>
+                                          <button
+                                            onClick={() =>
+                                              handleDeleteClick(item.id)
+                                            }
+                                            style={{
+                                              display: "inline-flex",
+                                              alignItems: "center",
+                                              padding: "0.375rem 0.75rem",
+                                              backgroundColor: "#f43f5e",
+                                              color: "white",
+                                              borderRadius: "0.375rem",
+                                              fontSize: "0.75rem",
+                                              fontWeight: "500",
+                                              border: "none",
+                                              boxShadow:
+                                                "0 1px 2px rgba(0, 0, 0, 0.05)",
+                                              cursor: "pointer",
+                                            }}
+                                            onMouseOver={(e) =>
+                                              (e.currentTarget.style.backgroundColor =
+                                                "#e11d48")
+                                            }
+                                            onMouseOut={(e) =>
+                                              (e.currentTarget.style.backgroundColor =
+                                                "#f43f5e")
+                                            }
+                                          >
+                                            <Trash2
+                                              size={14}
+                                              style={{
+                                                marginRight: "0.375rem",
+                                              }}
+                                            />
+                                            {t("delete")}
+                                          </button>
+                                        </div>
+                                      </motion.div>
+                                    )
+                                  )}
                                 </div>
                               </motion.div>
                             )}
