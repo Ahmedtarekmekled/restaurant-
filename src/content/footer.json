@@ -1,0 +1,130 @@
+{
+  "en": {
+    "branding": {
+      "title": "Taste Haven",
+      "description": "Bringing the finest culinary experiences to your table with passion and creativity."
+    },
+    "quickLinks": {
+      "title": "Quick Links",
+      "links": [
+        {
+          "label": "Menu",
+          "url": "/"
+        },
+        {
+          "label": "About Us",
+          "url": "/about"
+        }
+      ]
+    },
+    "contact": {
+      "title": "Connect With Us",
+      "socialLinks": [
+        {
+          "platform": "Facebook",
+          "icon": "facebook",
+          "url": "https://facebook.com"
+        },
+        {
+          "platform": "Instagram",
+          "icon": "instagram",
+          "url": "https://instagram.com"
+        },
+        {
+          "platform": "WhatsApp",
+          "icon": "whatsapp",
+          "url": "https://whatsapp.com"
+        }
+      ],
+      "info": [
+        {
+          "type": "phone",
+          "value": "+20 123 456 7890",
+          "icon": "phone"
+        },
+        {
+          "type": "email",
+          "value": "contact@tastehaven.com",
+          "icon": "mail"
+        },
+        {
+          "type": "address",
+          "value": "123 Culinary Street, Cairo, Egypt",
+          "icon": "map-pin"
+        }
+      ]
+    },
+    "legal": {
+      "copyright": "© {year} Taste Haven. All rights reserved.",
+      "developer": {
+        "text": "Designed & Developed by",
+        "name": "Ahmed Makled",
+        "url": "https://www.ahmedmakled.com/"
+      }
+    }
+  },
+  "ar": {
+    "branding": {
+      "title": "تيست هيفن",
+      "description": "نقدم لك أفضل التجارب الطهي بشغف وإبداع."
+    },
+    "quickLinks": {
+      "title": "روابط سريعة",
+      "links": [
+        {
+          "label": "القائمة",
+          "url": "/"
+        },
+        {
+          "label": "من نحن",
+          "url": "/about"
+        }
+      ]
+    },
+    "contact": {
+      "title": "تواصل معنا",
+      "socialLinks": [
+        {
+          "platform": "فيسبوك",
+          "icon": "facebook",
+          "url": "https://facebook.com"
+        },
+        {
+          "platform": "انستغرام",
+          "icon": "instagram",
+          "url": "https://instagram.com"
+        },
+        {
+          "platform": "واتساب",
+          "icon": "whatsapp",
+          "url": "https://whatsapp.com"
+        }
+      ],
+      "info": [
+        {
+          "type": "phone",
+          "value": "+20 123 456 7890",
+          "icon": "phone"
+        },
+        {
+          "type": "email",
+          "value": "contact@tastehaven.com",
+          "icon": "mail"
+        },
+        {
+          "type": "address",
+          "value": "123 شارع الطهي، القاهرة، مصر",
+          "icon": "map-pin"
+        }
+      ]
+    },
+    "legal": {
+      "copyright": "© {year} تيست هيفن. جميع الحقوق محفوظة.",
+      "developer": {
+        "text": "تصميم وتطوير",
+        "name": "أحمد مكلد",
+        "url": "https://www.ahmedmakled.com/"
+      }
+    }
+  }
+}

@@ -1,103 +1,342 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useMenu } from "@/context/MenuContext";
+import { useLanguage } from "@/context/LanguageContext";
+import MenuItemCard from "@/components/MenuItemCard";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { ChevronDown, ChevronUp, Search, X } from "lucide-react";
+import BasicButton from "@/components/BasicButton";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const { menuItemsByCategory, isLoading, error } = useMenu();
+  const { t, isRTL } = useLanguage();
+  const categories = Object.keys(menuItemsByCategory);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  // Initialize expanded categories state
+  const [expandedCategories, setExpandedCategories] = useState<
+    Record<string, boolean>
+  >({});
+
+  // Update expanded categories whenever categories change
+  useEffect(() => {
+    if (categories.length > 0) {
+      const newExpandedState = { ...expandedCategories };
+      let hasChanges = false;
+
+      categories.forEach((category) => {
+        // Only add categories that don't already exist in state
+        if (newExpandedState[category] === undefined) {
+          newExpandedState[category] = true;
+          hasChanges = true;
+        }
+      });
+
+      // Only update state if there are actual changes
+      if (hasChanges) {
+        setExpandedCategories(newExpandedState);
+      }
+    }
+  }, [categories]);
+
+  const toggleCategory = (category: string) => {
+    setExpandedCategories((prev) => ({
+      ...prev,
+      [category]: !prev[category],
+    }));
+  };
+
+  // Get category name with translation
+  const getCategoryName = (category: string) => {
+    // Convert the category to a key for translation
+    const key = category.toLowerCase().replace(/\s+/g, "");
+
+    // Check if there's a direct translation
+    if (t(key) !== key) return t(key);
+
+    // Check for specific categories we know about
+    switch (category) {
+      case "Appetizers":
+        return t("appetizers");
+      case "Main Dishes":
+        return t("mainDishes");
+      case "Desserts":
+        return t("desserts");
+      case "Drinks":
+        return t("drinks");
+      case "Specials":
+        return t("specials");
+      case "Sides":
+        return t("sides");
+      default:
+        return category;
+    }
+  };
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    show: { y: 0, opacity: 1, transition: { type: "spring", stiffness: 300 } },
+  };
+
+  // Check if we have any items matching the search term
+  const hasSearchResults = categories.some((category) =>
+    menuItemsByCategory[category]?.some((item) =>
+      item.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  // Define inline styles to avoid CSS issues
+  const styles = {
+    searchButton: {
+      backgroundColor: "#d97706",
+      color: "white",
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "8px",
+      padding: "8px 16px",
+      borderRadius: "20px",
+      border: "none",
+      fontSize: "14px",
+      fontWeight: "500" as const,
+      cursor: "pointer",
+      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+    },
+    searchInput: {
+      width: "100%",
+      padding: "12px 40px",
+      borderRadius: "24px",
+      border: "2px solid #fcd34d",
+      fontSize: "14px",
+      outline: "none",
+    },
+    searchIcon: {
+      position: "absolute" as const,
+      top: "50%",
+      transform: "translateY(-50%)",
+      [isRTL ? "right" : "left"]: "12px",
+      color: "#d97706",
+      fontSize: "18px",
+    },
+    clearButton: {
+      position: "absolute" as const,
+      top: "50%",
+      transform: "translateY(-50%)",
+      [isRTL ? "left" : "right"]: "12px",
+      backgroundColor: "transparent",
+      border: "none",
+      color: "#d97706",
+      fontSize: "18px",
+      cursor: "pointer",
+    },
+    searchContainer: {
+      marginBottom: "24px",
+      position: "relative" as const,
+      maxWidth: "480px",
+      margin: "0 auto 24px auto",
+    },
+    categoryButton: {
+      width: "100%",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: "16px",
+      backgroundColor: "#d97706",
+      color: "white",
+      border: "none",
+      cursor: "pointer",
+      fontSize: "18px",
+      fontWeight: "600" as const,
+      flexDirection: isRTL
+        ? ("row-reverse" as "row-reverse")
+        : ("row" as "row"),
+    },
+    chevronIcon: {
+      fontSize: "24px",
+      color: "#fef3c7",
+    },
+  };
+
+  return (
+    <div
+      className="min-h-screen bg-gradient-to-b from-amber-50 to-amber-100"
+      dir={isRTL ? "rtl" : "ltr"}
+    >
+      <Navbar />
+
+      <main className="max-w-6xl mx-auto py-4 md:py-8 px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-6 md:mb-10">
+          <motion.h1
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-3xl md:text-5xl font-serif font-bold text-amber-900 mb-2"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            {t("ourMenu")}
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-amber-700 max-w-lg mx-auto"
           >
-            Read our docs
-          </a>
+            {t("welcomeMessage")}
+          </motion.p>
         </div>
+
+        {/* Search section */}
+        <div style={styles.searchContainer}>
+          <div
+            style={{
+              display: showSearch ? "block" : "none",
+              marginBottom: "16px",
+            }}
+          >
+            <div style={{ position: "relative" }}>
+              <input
+                type="text"
+                placeholder={t("searchPlaceholder")}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={styles.searchInput}
+              />
+              <div style={styles.searchIcon}>🔍</div>
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  style={styles.clearButton}
+                >
+                  ✖
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div style={{ textAlign: "center" }}>
+            <BasicButton
+              onClick={() => setShowSearch(!showSearch)}
+              text={showSearch ? t("hideSearch") : t("showSearch")}
+            />
+          </div>
+        </div>
+
+        {isLoading ? (
+          <div className="flex justify-center items-center py-20">
+            <div className="relative h-16 w-16">
+              <div className="absolute inset-0 rounded-full border-4 border-amber-200 opacity-25"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-t-amber-600 animate-spin"></div>
+            </div>
+          </div>
+        ) : error ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-rose-100 border border-rose-400 text-rose-700 px-4 py-3 rounded-lg relative mx-auto max-w-md"
+            role="alert"
+          >
+            <span className="block sm:inline">{error}</span>
+          </motion.div>
+        ) : categories.length === 0 ? (
+          <p className="text-center text-amber-700 font-serif text-lg">
+            {t("noMenuItems")}
+          </p>
+        ) : !hasSearchResults && searchTerm ? (
+          <div className="text-center py-10">
+            <p className="text-amber-700 font-serif text-lg">
+              {t("noResults")}
+            </p>
+          </div>
+        ) : (
+          <motion.div
+            className="space-y-6 md:space-y-8"
+            initial="hidden"
+            animate="show"
+            variants={containerVariants}
+          >
+            {categories.map((category) => {
+              // Filter items in this category that match the search term
+              const filteredItems = searchTerm
+                ? menuItemsByCategory[category]?.filter((item) =>
+                    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+                  )
+                : menuItemsByCategory[category];
+
+              // Skip rendering categories with no matching items
+              if (!filteredItems || filteredItems.length === 0) return null;
+
+              return (
+                <motion.div
+                  key={category}
+                  className="rounded-xl overflow-hidden shadow-md bg-white"
+                  variants={itemVariants}
+                >
+                  <button
+                    onClick={() => toggleCategory(category)}
+                    style={styles.categoryButton}
+                  >
+                    <h2 className="text-xl md:text-2xl font-serif font-semibold">
+                      {getCategoryName(category)}
+                    </h2>
+                    <div style={styles.chevronIcon}>
+                      {expandedCategories[category] ? "▲" : "▼"}
+                    </div>
+                  </button>
+
+                  <AnimatePresence>
+                    {expandedCategories[category] && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                      >
+                        <div className="p-3 md:p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                          {filteredItems.map((item, itemIndex) => (
+                            <motion.div
+                              key={item.id}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -20 }}
+                              transition={{ duration: 0.3 }}
+                            >
+                              <MenuItemCard
+                                item={item}
+                                priority={
+                                  // Only set priority for the first few items that are likely to be above the fold
+                                  expandedCategories[category] &&
+                                  categories.indexOf(category) === 0 &&
+                                  itemIndex < 3
+                                }
+                              />
+                            </motion.div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        )}
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+      <Footer />
     </div>
   );
 }

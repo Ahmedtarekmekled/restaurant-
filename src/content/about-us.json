@@ -1,0 +1,82 @@
+{
+  "en": {
+    "title": "About Taste Haven",
+    "sections": [
+      {
+        "heading": "Our Story",
+        "content": "Founded in 2020, Taste Haven started as a small family-owned restaurant with a passion for creating delicious, authentic dishes. What began as a dream has now grown into a beloved culinary destination in our community."
+      },
+      {
+        "heading": "Our Philosophy",
+        "content": "At Taste Haven, we believe that great food comes from great ingredients. We source only the freshest, highest-quality ingredients from local suppliers whenever possible. Every dish is prepared with care, attention to detail, and a touch of creativity."
+      },
+      {
+        "heading": "Our Team",
+        "content": "Our talented team of chefs brings decades of culinary experience from around the world. Led by Executive Chef Maria Rodriguez, our kitchen combines traditional techniques with modern innovation to create unforgettable dining experiences."
+      },
+      {
+        "heading": "Our Commitment",
+        "content": "We are committed to sustainability, supporting local farmers, and reducing our environmental footprint. We strive to create a warm, welcoming atmosphere where every guest feels like family."
+      }
+    ],
+    "callToAction": "Visit us today and experience the Taste Haven difference!",
+    "contactInfo": {
+      "title": "Visit Us",
+      "addressTitle": "Location",
+      "address": "123 Culinary Street, Foodie District, City",
+      "hoursTitle": "Hours",
+      "hours": "Monday - Sunday, 10:00 AM - 10:00 PM",
+      "contactTitle": "Contact",
+      "phone": "+1 (555) 123-4567",
+      "email": "info@tastehaven.com",
+      "buttonText": "Contact Us Now"
+    },
+    "images": {
+      "hero": "/images/restaurant-hero.jpg",
+      "story": "/images/about-story.jpg",
+      "philosophy": "/images/about-philosophy.jpg",
+      "team": "/images/about-team.jpg",
+      "commitment": "/images/about-commitment.jpg"
+    }
+  },
+  "ar": {
+    "title": "عن المذاق الرائع",
+    "sections": [
+      {
+        "heading": "قصتنا",
+        "content": "تأسس مطعم المذاق الرائع في عام 2020 كمطعم عائلي صغير مع شغف بإعداد أطباق لذيذة وأصيلة. ما بدأ كحلم نما الآن ليصبح وجهة طهي محبوبة في مجتمعنا."
+      },
+      {
+        "heading": "فلسفتنا",
+        "content": "في المذاق الرائع، نؤمن بأن الطعام الرائع يأتي من المكونات الرائعة. نحن نستخدم فقط المكونات الطازجة وعالية الجودة من الموردين المحليين كلما أمكن ذلك. يتم إعداد كل طبق بعناية واهتمام بالتفاصيل ولمسة من الإبداع."
+      },
+      {
+        "heading": "فريقنا",
+        "content": "يجلب فريقنا الموهوب من الطهاة عقودًا من الخبرة الطهي من جميع أنحاء العالم. تحت قيادة الشيف التنفيذي ماريا رودريغيز، يجمع مطبخنا بين التقنيات التقليدية والابتكار الحديث لخلق تجارب طعام لا تُنسى."
+      },
+      {
+        "heading": "التزامنا",
+        "content": "نحن ملتزمون بالاستدامة ودعم المزارعين المحليين وتقليل بصمتنا البيئية. نسعى جاهدين لخلق جو دافئ ومرحب حيث يشعر كل ضيف وكأنه عائلة."
+      }
+    ],
+    "callToAction": "قم بزيارتنا اليوم واختبر الفرق في المذاق الرائع!",
+    "contactInfo": {
+      "title": "زورونا",
+      "addressTitle": "الموقع",
+      "address": "١٢٣ شارع الطهي، حي الطعام، المدينة",
+      "hoursTitle": "ساعات العمل",
+      "hours": "الاثنين - الأحد، ١٠:٠٠ صباحًا - ١٠:٠٠ مساءً",
+      "contactTitle": "للتواصل",
+      "phone": "+١ (٥٥٥) ١٢٣-٤٥٦٧",
+      "email": "info@tastehaven.com",
+      "buttonText": "تواصل معنا الآن"
+    },
+    "images": {
+      "hero": "/images/restaurant-hero.jpg",
+      "story": "/images/about-story.jpg",
+      "philosophy": "/images/about-philosophy.jpg",
+      "team": "/images/about-team.jpg",
+      "commitment": "/images/about-commitment.jpg"
+    }
+  }
+}
