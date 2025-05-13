@@ -2,7 +2,7 @@
 
 A modern, multilingual restaurant menu web application built with Next.js, Tailwind CSS, and Supabase. Easily manage and display your restaurant's menu with beautiful UI, multilingual support, and a protected admin dashboard.
 
-![Taste Haven Menu Demo](https://via.placeholder.com/800x400?text=Taste+Haven+Menu+Demo)
+![Taste Haven Menu Demo](https://restaurant-neon-psi.vercel.app/)
 
 ## ✨ Features
 
@@ -116,7 +116,7 @@ The admin dashboard is protected with environment-based authentication:
 - Log in using the credentials set in your `.env.local` file
 - Manage menu items, categories, and upload images
 
-![Admin Dashboard](https://via.placeholder.com/800x400?text=Admin+Dashboard)
+![Admin Dashboard](https://restaurant-neon-psi.vercel.app/dashboard)
 
 ## 📱 Menu Display
 
