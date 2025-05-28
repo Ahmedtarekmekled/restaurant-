@@ -138,6 +138,7 @@ export default function Home() {
       flexWrap: "wrap" as const,
       gap: "8px",
       marginTop: "12px",
+      marginBottom: "24px",
       justifyContent: "center",
     },
     categoryFilterButton: {
@@ -285,9 +286,11 @@ export default function Home() {
           >
             {categories.map((category) => {
               // Filter items in this category that match the selected category
-              const filteredItems = menuItemsByCategory[category]?.filter(
-                (item) => category === selectedCategory
-              );
+              const filteredItems = selectedCategory
+                ? menuItemsByCategory[category]?.filter(
+                    (item) => category === selectedCategory
+                  )
+                : menuItemsByCategory[category];
 
               // Skip rendering categories with no matching items
               if (!filteredItems || filteredItems.length === 0) return null;
