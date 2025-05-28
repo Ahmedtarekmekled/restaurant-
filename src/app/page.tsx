@@ -8,6 +8,7 @@ import MenuItemCard from "@/components/MenuItemCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BasicButton from "@/components/BasicButton";
+import { ArrowUp } from "lucide-react";
 
 export default function Home() {
   const { menuItemsByCategory, isLoading, error } = useMenu();
@@ -15,6 +16,8 @@ export default function Home() {
   const categories = Object.keys(menuItemsByCategory);
   const [searchTerm, setSearchTerm] = useState("");
   const [showSearch, setShowSearch] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   // Initialize expanded categories state
   const [expandedCategories, setExpandedCategories] = useState<
@@ -55,6 +58,24 @@ export default function Home() {
       }
     }
   }, [expandedCategories]);
+
+  // Add scroll event listener
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setShowScrollTop(scrollPosition > 300); // Show button after scrolling 300px
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
 
   const toggleCategory = (category: string) => {
     setExpandedCategories((prev) => ({
@@ -106,12 +127,13 @@ export default function Home() {
     show: { y: 0, opacity: 1, transition: { type: "spring", stiffness: 300 } },
   };
 
-  // Check if we have any items matching the search term
-  const hasSearchResults = categories.some((category) =>
-    menuItemsByCategory[category]?.some((item) =>
+  // Check if we have any items matching the search term and category
+  const hasSearchResults = categories.some((category) => {
+    if (selectedCategory && category !== selectedCategory) return false;
+    return menuItemsByCategory[category]?.some((item) =>
       item.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+    );
+  });
 
   // Styles
   const styles = {
@@ -149,6 +171,27 @@ export default function Home() {
       maxWidth: "480px",
       margin: "0 auto 24px auto",
     },
+    categoryFilter: {
+      display: "flex",
+      flexWrap: "wrap" as const,
+      gap: "8px",
+      marginTop: "12px",
+      justifyContent: "center",
+    },
+    categoryFilterButton: {
+      padding: "6px 12px",
+      backgroundColor: "#fef3c7",
+      color: "#92400e",
+      border: "1px solid #d97706",
+      borderRadius: "16px",
+      cursor: "pointer",
+      fontSize: "14px",
+      transition: "all 0.2s",
+    },
+    activeCategoryButton: {
+      backgroundColor: "#d97706",
+      color: "white",
+    },
     categoryButton: {
       width: "100%",
       display: "flex",
@@ -175,6 +218,28 @@ export default function Home() {
       dir={isRTL ? "rtl" : "ltr"}
     >
       <Navbar />
+
+      {/* Scroll to Top Button */}
+      <button
+        onClick={scrollToTop}
+        className={`fixed bottom-6 right-6 z-50 p-2 rounded-full bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-lg transition-all duration-300 transform hover:scale-105 hover:from-amber-700 hover:to-amber-800 ${
+          showScrollTop
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-10 pointer-events-none"
+        }`}
+        style={{
+          width: "40px",
+          height: "40px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          border: "none",
+          outline: "none",
+        }}
+        aria-label="Scroll to top"
+      >
+        <ArrowUp size={18} />
+      </button>
 
       <main className="max-w-6xl mx-auto py-4 md:py-8 px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-6 md:mb-10">
@@ -222,6 +287,35 @@ export default function Home() {
                 </button>
               )}
             </div>
+
+            {/* Category filter */}
+            <div style={styles.categoryFilter}>
+              <button
+                onClick={() => setSelectedCategory("")}
+                style={{
+                  ...styles.categoryFilterButton,
+                  ...(selectedCategory === ""
+                    ? styles.activeCategoryButton
+                    : {}),
+                }}
+              >
+                {t("allCategories")}
+              </button>
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  style={{
+                    ...styles.categoryFilterButton,
+                    ...(selectedCategory === category
+                      ? styles.activeCategoryButton
+                      : {}),
+                  }}
+                >
+                  {getCategoryName(category)}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div style={{ textAlign: "center" }}>
@@ -266,12 +360,18 @@ export default function Home() {
             variants={containerVariants}
           >
             {categories.map((category) => {
-              // Filter items in this category that match the search term
-              const filteredItems = searchTerm
-                ? menuItemsByCategory[category]?.filter((item) =>
-                    item.name.toLowerCase().includes(searchTerm.toLowerCase())
-                  )
-                : menuItemsByCategory[category];
+              // Filter items in this category that match the search term and selected category
+              const filteredItems = menuItemsByCategory[category]?.filter(
+                (item) => {
+                  const matchesSearch = searchTerm
+                    ? item.name.toLowerCase().includes(searchTerm.toLowerCase())
+                    : true;
+                  const matchesCategory = selectedCategory
+                    ? category === selectedCategory
+                    : true;
+                  return matchesSearch && matchesCategory;
+                }
+              );
 
               // Skip rendering categories with no matching items
               if (!filteredItems || filteredItems.length === 0) return null;

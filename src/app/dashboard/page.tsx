@@ -33,6 +33,7 @@ import {
   FileText,
   Image as ImageIcon,
   Paperclip,
+  ArrowUp,
 } from "lucide-react";
 import { formatEGP } from "@/utils/currency";
 
@@ -99,6 +100,9 @@ export default function Dashboard() {
     show: { y: 0, opacity: 1, transition: { type: "spring", stiffness: 300 } },
   };
 
+  // State for scroll to top button
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
   // Fetch menu items grouped by category
   const fetchMenuItems = useCallback(async () => {
     setIsLoading(true);
@@ -132,6 +136,24 @@ export default function Dashboard() {
     fetchMenuItems();
   }, [fetchMenuItems]);
 
+  // Add scroll event listener
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setShowScrollTop(scrollPosition > 300); // Show button after scrolling 300px
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   const toggleLanguage = () => {
     setLanguage(language === "en" ? "ar" : "en");
   };
@@ -142,7 +164,7 @@ export default function Dashboard() {
     >
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value || "" }));
   };
 
   const resetForm = () => {
@@ -244,11 +266,11 @@ export default function Dashboard() {
   const handleEdit = (item: MenuItem) => {
     setFormData({
       id: item.id,
-      name: item.name,
+      name: item.name || "",
       price: item.price.toString(),
-      category: item.category,
-      image_url: item.image_url,
-      description: item.description,
+      category: item.category || "",
+      image_url: item.image_url || "",
+      description: item.description || "",
     });
     setIsEditing(true);
     setEditSuccess("");
@@ -322,10 +344,16 @@ export default function Dashboard() {
   };
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
 
-  // Filter menu items based on search query
+  // Filter menu items based on search query and category
   const filteredMenuItemsByCategory = Object.keys(menuItemsByCategory).reduce(
     (acc, category) => {
+      // Skip categories that don't match the selected category filter
+      if (selectedCategory && category !== selectedCategory) {
+        return acc;
+      }
+
       if (searchQuery.trim() === "") {
         acc[category] = menuItemsByCategory[category];
       } else {
@@ -346,6 +374,28 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-amber-50">
       <Navbar />
+
+      {/* Scroll to Top Button */}
+      <button
+        onClick={scrollToTop}
+        className={`fixed bottom-6 right-6 z-50 p-2 rounded-full bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-lg transition-all duration-300 transform hover:scale-105 hover:from-amber-700 hover:to-amber-800 ${
+          showScrollTop
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-10 pointer-events-none"
+        }`}
+        style={{
+          width: "40px",
+          height: "40px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          border: "none",
+          outline: "none",
+        }}
+        aria-label="Scroll to top"
+      >
+        <ArrowUp size={18} />
+      </button>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
@@ -410,7 +460,7 @@ export default function Dashboard() {
         <div className="grid md:grid-cols-12 gap-8" dir={isRTL ? "rtl" : "ltr"}>
           {/* Section 1: Add New Menu Item */}
           <div className="md:col-span-4">
-            <div className="bg-white rounded-lg shadow-md overflow-hidden border border-amber-100">
+            <div className="bg-white rounded-lg shadow-md overflow-hidden border border-amber-100 sticky top-24">
               <div className="bg-gradient-to-r from-amber-600 to-amber-700 py-4 px-6">
                 <h2 className="text-xl font-serif font-semibold text-white flex items-center">
                   {isEditing ? (
@@ -817,7 +867,7 @@ export default function Dashboard() {
                     />
                   </div>
                 ) : Object.keys(filteredMenuItemsByCategory).length === 0 &&
-                  searchQuery.trim() !== "" ? (
+                  (searchQuery.trim() !== "" || selectedCategory !== "") ? (
                   <div className="text-center py-10">
                     <p className="text-amber-700 font-serif text-lg">
                       {t("noResults")}
@@ -830,9 +880,9 @@ export default function Dashboard() {
                     animate="show"
                     variants={containerVariants}
                   >
-                    {/* Search box */}
-                    <div className="mb-4">
-                      <div className="relative">
+                    {/* Search and filter section */}
+                    <div className="p-4 border-b border-amber-100">
+                      <div className="relative mb-4">
                         <input
                           type="text"
                           placeholder={t("searchItems")}
@@ -856,6 +906,59 @@ export default function Dashboard() {
                             />
                           </svg>
                         </div>
+                      </div>
+
+                      {/* Category filter */}
+                      <div className="flex flex-wrap gap-3 justify-center">
+                        <button
+                          onClick={() => setSelectedCategory("")}
+                          className={`group relative px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2 overflow-hidden ${
+                            selectedCategory === ""
+                              ? "bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-lg ring-2 ring-amber-500 ring-offset-2"
+                              : "bg-white text-amber-800 border-2 border-amber-200 hover:border-amber-400 hover:bg-amber-50"
+                          }`}
+                        >
+                          <span className="relative z-10 flex items-center gap-2">
+                            <Tag
+                              size={16}
+                              className={
+                                selectedCategory === ""
+                                  ? "text-white"
+                                  : "text-amber-600"
+                              }
+                            />
+                            {t("allCategories")}
+                          </span>
+                          {selectedCategory === "" && (
+                            <span className="absolute inset-0 bg-gradient-to-r from-amber-500 to-amber-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          )}
+                        </button>
+                        {Object.keys(menuItemsByCategory).map((category) => (
+                          <button
+                            key={category}
+                            onClick={() => setSelectedCategory(category)}
+                            className={`group relative px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2 overflow-hidden ${
+                              selectedCategory === category
+                                ? "bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-lg ring-2 ring-amber-500 ring-offset-2"
+                                : "bg-white text-amber-800 border-2 border-amber-200 hover:border-amber-400 hover:bg-amber-50"
+                            }`}
+                          >
+                            <span className="relative z-10 flex items-center gap-2">
+                              <Tag
+                                size={16}
+                                className={
+                                  selectedCategory === category
+                                    ? "text-white"
+                                    : "text-amber-600"
+                                }
+                              />
+                              {getCategoryName(category)}
+                            </span>
+                            {selectedCategory === category && (
+                              <span className="absolute inset-0 bg-gradient-to-r from-amber-500 to-amber-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                            )}
+                          </button>
+                        ))}
                       </div>
                     </div>
 
