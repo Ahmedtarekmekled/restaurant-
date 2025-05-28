@@ -14,8 +14,6 @@ export default function Home() {
   const { menuItemsByCategory, isLoading, error } = useMenu();
   const { t, isRTL } = useLanguage();
   const categories = Object.keys(menuItemsByCategory);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showSearch, setShowSearch] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [showScrollTop, setShowScrollTop] = useState(false);
 
@@ -127,50 +125,14 @@ export default function Home() {
     show: { y: 0, opacity: 1, transition: { type: "spring", stiffness: 300 } },
   };
 
-  // Check if we have any items matching the search term and category
+  // Check if we have any items matching the category
   const hasSearchResults = categories.some((category) => {
     if (selectedCategory && category !== selectedCategory) return false;
-    return menuItemsByCategory[category]?.some((item) =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    return menuItemsByCategory[category]?.length > 0;
   });
 
   // Styles
   const styles = {
-    searchInput: {
-      width: "100%",
-      padding: "12px 40px 12px 40px",
-      border: "2px solid #d97706",
-      borderRadius: "8px",
-      fontSize: "16px",
-      color: "#713f12",
-      outline: "none",
-    },
-    searchIcon: {
-      position: "absolute" as const,
-      left: "12px",
-      top: "50%",
-      transform: "translateY(-50%)",
-      fontSize: "18px",
-      color: "#d97706",
-    },
-    clearButton: {
-      position: "absolute" as const,
-      right: "12px",
-      top: "50%",
-      transform: "translateY(-50%)",
-      backgroundColor: "transparent",
-      border: "none",
-      color: "#d97706",
-      fontSize: "18px",
-      cursor: "pointer",
-    },
-    searchContainer: {
-      marginBottom: "24px",
-      position: "relative" as const,
-      maxWidth: "480px",
-      margin: "0 auto 24px auto",
-    },
     categoryFilter: {
       display: "flex",
       flexWrap: "wrap" as const,
@@ -261,69 +223,31 @@ export default function Home() {
           </motion.p>
         </div>
 
-        {/* Search section */}
-        <div style={styles.searchContainer}>
-          <div
+        {/* Category filter section */}
+        <div style={styles.categoryFilter}>
+          <button
+            onClick={() => setSelectedCategory("")}
             style={{
-              display: showSearch ? "block" : "none",
-              marginBottom: "16px",
+              ...styles.categoryFilterButton,
+              ...(selectedCategory === "" ? styles.activeCategoryButton : {}),
             }}
           >
-            <div style={{ position: "relative" }}>
-              <input
-                type="text"
-                placeholder={t("searchPlaceholder")}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={styles.searchInput}
-              />
-              <div style={styles.searchIcon}>🔍</div>
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm("")}
-                  style={styles.clearButton}
-                >
-                  ✖
-                </button>
-              )}
-            </div>
-
-            {/* Category filter */}
-            <div style={styles.categoryFilter}>
-              <button
-                onClick={() => setSelectedCategory("")}
-                style={{
-                  ...styles.categoryFilterButton,
-                  ...(selectedCategory === ""
-                    ? styles.activeCategoryButton
-                    : {}),
-                }}
-              >
-                {t("allCategories")}
-              </button>
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  style={{
-                    ...styles.categoryFilterButton,
-                    ...(selectedCategory === category
-                      ? styles.activeCategoryButton
-                      : {}),
-                  }}
-                >
-                  {getCategoryName(category)}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div style={{ textAlign: "center" }}>
-            <BasicButton
-              onClick={() => setShowSearch(!showSearch)}
-              text={showSearch ? t("hideSearch") : t("showSearch")}
-            />
-          </div>
+            {t("allCategories")}
+          </button>
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setSelectedCategory(category)}
+              style={{
+                ...styles.categoryFilterButton,
+                ...(selectedCategory === category
+                  ? styles.activeCategoryButton
+                  : {}),
+              }}
+            >
+              {getCategoryName(category)}
+            </button>
+          ))}
         </div>
 
         {isLoading ? (
@@ -346,7 +270,7 @@ export default function Home() {
           <p className="text-center text-amber-700 font-serif text-lg">
             {t("noMenuItems")}
           </p>
-        ) : !hasSearchResults && searchTerm ? (
+        ) : !hasSearchResults && selectedCategory ? (
           <div className="text-center py-10">
             <p className="text-amber-700 font-serif text-lg">
               {t("noResults")}
@@ -360,17 +284,9 @@ export default function Home() {
             variants={containerVariants}
           >
             {categories.map((category) => {
-              // Filter items in this category that match the search term and selected category
+              // Filter items in this category that match the selected category
               const filteredItems = menuItemsByCategory[category]?.filter(
-                (item) => {
-                  const matchesSearch = searchTerm
-                    ? item.name.toLowerCase().includes(searchTerm.toLowerCase())
-                    : true;
-                  const matchesCategory = selectedCategory
-                    ? category === selectedCategory
-                    : true;
-                  return matchesSearch && matchesCategory;
-                }
+                (item) => category === selectedCategory
               );
 
               // Skip rendering categories with no matching items

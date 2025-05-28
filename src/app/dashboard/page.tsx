@@ -343,29 +343,16 @@ export default function Dashboard() {
     // Implementation of handleImageAttach function
   };
 
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
 
-  // Filter menu items based on search query and category
+  // Filter menu items based on category
   const filteredMenuItemsByCategory = Object.keys(menuItemsByCategory).reduce(
     (acc, category) => {
       // Skip categories that don't match the selected category filter
       if (selectedCategory && category !== selectedCategory) {
         return acc;
       }
-
-      if (searchQuery.trim() === "") {
-        acc[category] = menuItemsByCategory[category];
-      } else {
-        const filteredItems = menuItemsByCategory[category].filter(
-          (item) =>
-            item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.description.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        if (filteredItems.length > 0) {
-          acc[category] = filteredItems;
-        }
-      }
+      acc[category] = menuItemsByCategory[category];
       return acc;
     },
     {} as Record<string, MenuItem[]>
@@ -460,7 +447,7 @@ export default function Dashboard() {
         <div className="grid md:grid-cols-12 gap-8" dir={isRTL ? "rtl" : "ltr"}>
           {/* Section 1: Add New Menu Item */}
           <div className="md:col-span-4">
-            <div className="bg-white rounded-lg shadow-md overflow-hidden border border-amber-100 sticky top-24">
+            <div className="bg-white rounded-lg shadow-md overflow-hidden border border-amber-100">
               <div className="bg-gradient-to-r from-amber-600 to-amber-700 py-4 px-6">
                 <h2 className="text-xl font-serif font-semibold text-white flex items-center">
                   {isEditing ? (
@@ -866,8 +853,7 @@ export default function Dashboard() {
                       className="animate-spin text-amber-500"
                     />
                   </div>
-                ) : Object.keys(filteredMenuItemsByCategory).length === 0 &&
-                  (searchQuery.trim() !== "" || selectedCategory !== "") ? (
+                ) : Object.keys(filteredMenuItemsByCategory).length === 0 ? (
                   <div className="text-center py-10">
                     <p className="text-amber-700 font-serif text-lg">
                       {t("noResults")}
@@ -880,35 +866,8 @@ export default function Dashboard() {
                     animate="show"
                     variants={containerVariants}
                   >
-                    {/* Search and filter section */}
+                    {/* Category filter section */}
                     <div className="p-4 border-b border-amber-100">
-                      <div className="relative mb-4">
-                        <input
-                          type="text"
-                          placeholder={t("searchItems")}
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          className="w-full p-2 pl-8 border border-amber-200 rounded-md"
-                        />
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-2 text-amber-500">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                            />
-                          </svg>
-                        </div>
-                      </div>
-
-                      {/* Category filter */}
                       <div className="flex flex-wrap gap-3 justify-center">
                         <button
                           onClick={() => setSelectedCategory("")}
